@@ -7,4 +7,9 @@ public class ItemSO : ScriptableObject
     [SerializeField] private string _itemName;
     [SerializeField] private Sprite _itemIcon;
     [SerializeField] private int _maxStackSize = 1;
+
+    public int ItemID       => _itemID;
+    public string ItemName  => _itemName;
+    public Sprite ItemIcon  => _itemIcon;
+    public int MaxStackSize => _maxStackSize;
 }
