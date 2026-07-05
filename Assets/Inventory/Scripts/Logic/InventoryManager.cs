@@ -67,23 +67,32 @@ public class InventoryManager : MonoBehaviour
 
     public bool RemoveItem(ItemSO item, int amount)
     {
+        if (!CanRemoveItem(item, amount)) return false;
+
+        int remainingRemove = amount;
+
         int count = slots.Length;
-        for (int i = count; i > 0; i--)
+        for (int i = count-1; i >= 0; i--)
         {
             ref InventorySlot slot = ref slots[i];
-            if (slot.currentAmount > amount)
+            if(slot.item != null && item.ItemID == slot.item.ItemID)
             {
-                slot.currentAmount -= amount;
-                return true;
-            }
-            else if(slot.currentAmount <= amount)
-            {
-                slot.item = null;
-                slot.currentAmount = 0;
-                return true;
+                if(slot.currentAmount > remainingRemove)
+                {
+                    slot.currentAmount -= remainingRemove;
+                    remainingRemove = 0;
+                }
+                else
+                {
+                    remainingRemove -= slot.currentAmount;
+                    slot.currentAmount = 0;
+                    slot.item = null;
+                }
+
+                if(remainingRemove == 0) return true;
             }
         }
-        return false;
+        return true;
     }
 
     // This method is for checking if an item fits in the inventory before adding that item so no item is being wasted
@@ -114,6 +123,24 @@ public class InventoryManager : MonoBehaviour
             }
         }
         return remaining == 0;
+    }
+
+    // Checks if inventory has enough items to remove before performing the actual removal
+    public bool CanRemoveItem(ItemSO item, int amount)
+    {
+        int remaining = amount;
+        int count = slots.Length;
+
+        for(int i = 0; i < count; i++)
+        {
+            ref InventorySlot slot = ref slots[i];
+            if (slot.item != null && item.ItemID == slot.item.ItemID)
+            {
+                remaining -= slot.currentAmount;
+                if(remaining <= 0) return true;
+            }
+        }
+        return false;
     }
 }
 
