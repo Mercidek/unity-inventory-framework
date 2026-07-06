@@ -1,9 +1,12 @@
+using System;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
     [SerializeField] private int inventorySize = 10;
     public InventorySlot[] slots;
+
+    public event Action<int> OnSlotChanged;
 
     private void Awake()
     {
@@ -30,11 +33,13 @@ public class InventoryManager : MonoBehaviour
                     {
                         leftoverItemCount = total - newItem.MaxStackSize;
                         slot.currentAmount = newItem.MaxStackSize;
+                        OnSlotChanged?.Invoke(i);
                     }
                     else
                     {
                         slot.currentAmount = total;
                         leftoverItemCount = 0;
+                        OnSlotChanged?.Invoke(i);
                     }
                 }
                 if (leftoverItemCount == 0) return true;
@@ -53,11 +58,13 @@ public class InventoryManager : MonoBehaviour
                 {
                     slot.currentAmount = newItem.MaxStackSize;
                     leftoverItemCount -= newItem.MaxStackSize;
+                    OnSlotChanged?.Invoke(i);
                 }
                 else
                 {
                     slot.currentAmount = leftoverItemCount;
                     leftoverItemCount = 0;
+                    OnSlotChanged?.Invoke(i);
                 }
                 if (leftoverItemCount == 0) return true;
             }
@@ -81,12 +88,14 @@ public class InventoryManager : MonoBehaviour
                 {
                     slot.currentAmount -= remainingRemove;
                     remainingRemove = 0;
+                    OnSlotChanged?.Invoke(i);
                 }
                 else
                 {
                     remainingRemove -= slot.currentAmount;
                     slot.currentAmount = 0;
                     slot.item = null;
+                    OnSlotChanged?.Invoke(i);
                 }
 
                 if(remainingRemove == 0) return true;
