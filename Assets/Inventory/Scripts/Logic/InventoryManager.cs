@@ -4,6 +4,8 @@ using UnityEngine;
 public class InventoryManager : MonoBehaviour
 {
     [SerializeField] private int inventorySize = 10;
+    public int InventorySize => inventorySize;
+
     public InventorySlot[] slots;
 
     public event Action<int> OnSlotChanged;
