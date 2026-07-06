@@ -17,6 +17,23 @@ public class InventoryUI : MonoBehaviour
         {
             InventorySlotUI newSlot = Instantiate(slotPrefab, slotContainer);
             inventorySlots.Add(newSlot);
+            UpdateSingleSlot(i);
         }
+
+        currentInventory.OnSlotChanged += UpdateSingleSlot;
+    }
+
+    private void OnDisable()
+    {
+        if(currentInventory != null)
+        {
+            currentInventory.OnSlotChanged -= UpdateSingleSlot;
+        }
+    }
+
+    public void UpdateSingleSlot(int slotIndex)
+    {
+        ItemSO item = currentInventory.GetItemAtSlot(slotIndex, out int amount);
+        inventorySlots[slotIndex].UpdateSlotUI(item, amount);
     }
 }

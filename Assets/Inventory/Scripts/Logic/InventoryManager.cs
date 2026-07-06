@@ -6,7 +6,7 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private int inventorySize = 10;
     public int InventorySize => inventorySize;
 
-    public InventorySlot[] slots;
+    private InventorySlot[] slots;
 
     public event Action<int> OnSlotChanged;
 
@@ -152,6 +152,11 @@ public class InventoryManager : MonoBehaviour
             }
         }
         return false;
+    }
+    public ItemSO GetItemAtSlot(int slotIndex, out int amount)
+    {
+        amount = slots[slotIndex].currentAmount;
+        return slots[slotIndex].item;
     }
 }
 
