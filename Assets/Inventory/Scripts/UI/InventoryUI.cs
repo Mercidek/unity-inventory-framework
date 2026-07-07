@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
@@ -17,6 +17,7 @@ public class InventoryUI : MonoBehaviour
         {
             InventorySlotUI newSlot = Instantiate(slotPrefab, slotContainer);
             inventorySlots.Add(newSlot);
+            newSlot.InitSlot(i, this);
             UpdateSingleSlot(i);
         }
 
@@ -35,5 +36,14 @@ public class InventoryUI : MonoBehaviour
     {
         ItemSO item = currentInventory.GetItemAtSlot(slotIndex, out int amount);
         inventorySlots[slotIndex].UpdateSlotUI(item, amount);
+    }
+
+    public void HoverSlot(int slotIndex)
+    {
+        ItemSO item = currentInventory.GetItemAtSlot(slotIndex, out int amount);
+        if (item != null)
+        {
+            TooltipManager.Instance.ShowTooltip(item.ItemName, item.ItemDesc);
+        }
     }
 }
