@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class InventoryUI : MonoBehaviour
 {
@@ -7,21 +8,64 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private InventorySlotUI slotPrefab;
     private InventoryManager currentInventory;
     private List<InventorySlotUI> inventorySlots = new List<InventorySlotUI>();
+    private ObjectPool<InventorySlotUI> slotPool;
 
+    private void Awake()
+    {
+        slotPool = new ObjectPool<InventorySlotUI>(
+            createFunc: () => Instantiate(slotPrefab, slotContainer),
+            actionOnGet: slot => slot.gameObject.SetActive(true),
+            actionOnRelease: slot => slot.gameObject.SetActive(false),
+            actionOnDestroy: slot => Destroy(slot.gameObject),
+            collectionCheck: true,
+            defaultCapacity: 20,
+            maxSize: 100
+        );
+    }
     public void SetupInventoryUI(InventoryManager inventory)
     {
+        if(!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
+        }
+
+        if (inventorySlots.Count > 0)
+        {
+            foreach (var oldSlot in inventorySlots)
+            {
+                slotPool.Release(oldSlot);
+            }
+            inventorySlots.Clear();
+        }
+
+        if (currentInventory != null) currentInventory.OnSlotChanged -= UpdateSingleSlot;
+
         currentInventory = inventory;
 
         int inventorySize = inventory.InventorySize;
         for(int i = 0; i < inventorySize; i++)
         {
-            InventorySlotUI newSlot = Instantiate(slotPrefab, slotContainer);
+            InventorySlotUI newSlot = slotPool.Get();
+            newSlot.transform.SetAsLastSibling();
             inventorySlots.Add(newSlot);
             newSlot.InitSlot(i, this);
             UpdateSingleSlot(i);
         }
 
         currentInventory.OnSlotChanged += UpdateSingleSlot;
+    }
+
+    public void CloseInventoryUI()
+    {
+        if (inventorySlots.Count > 0)
+        {
+            foreach (var oldSlot in inventorySlots)
+            {
+                slotPool.Release(oldSlot);
+            }
+            inventorySlots.Clear();
+        }
+        gameObject.SetActive(false);
     }
 
     private void OnDisable()
