@@ -1,18 +1,16 @@
 using System;
 using UnityEngine;
 
-public class InventoryManager : MonoBehaviour
+public class InventoryManager
 {
-    [SerializeField] private int inventorySize = 10;
-    public int InventorySize => inventorySize;
-
     private InventorySlot[] slots;
+    public int InventorySize => slots.Length;
 
     public event Action<int> OnSlotChanged;
 
-    private void Awake()
+    public InventoryManager(int size)
     {
-        slots = new InventorySlot[inventorySize];
+        slots = new InventorySlot[size];
     }
 
     // The first loop is for stacking and the second is for adding to an empty slot
