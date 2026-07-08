@@ -1,19 +1,21 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler
+public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler, IPointerClickHandler
 {
     [SerializeField] private Image slotIcon;
     [SerializeField] private TextMeshProUGUI slotAmountText;
-    private InventoryUI myParent;
     private int myIndex;
 
-    public void InitSlot(int index, InventoryUI UIParent)
+    public event Action<int> OnSlotHovered;
+    public event Action<int, int> OnSlotClicked;
+
+    public void InitSlot(int index)
     {
         myIndex   = index;
-        myParent  = UIParent;
     }
 
     public void UpdateSlotUI(ItemSO item, int amount)
@@ -41,7 +43,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        myParent.HoverSlot(myIndex);
+        OnSlotHovered?.Invoke(myIndex);
     }
     public void OnPointerExit(PointerEventData eventData)
     {
@@ -51,5 +53,10 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public void OnPointerMove(PointerEventData eventData)
     {
         TooltipManager.Instance.UpdatePosition(eventData.position);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        OnSlotClicked?.Invoke(myIndex, 1);
     }
 }

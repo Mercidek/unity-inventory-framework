@@ -106,7 +106,27 @@ public class InventoryManager : MonoBehaviour
         return true;
     }
 
-    // This method is for checking if an item fits in the inventory before adding that item so no item is being wasted
+    public void RemoveItemAtSlot(int slotIndex, int amount)
+    {
+        ref InventorySlot slot = ref slots[slotIndex];
+        if (slot.item != null)
+        {
+            if (slot.currentAmount >= amount)
+            {
+                slot.currentAmount -= amount;
+                OnSlotChanged?.Invoke(slotIndex);
+            }
+
+            if(slot.currentAmount <= 0)
+            {
+                slot.item = null;
+                TooltipManager.Instance.HideTooltip();
+                OnSlotChanged?.Invoke(slotIndex);
+            }
+        }
+    }
+
+    // Checks if an item fits in the inventory before adding that item so no item is being wasted
     public bool CanAddItem(ItemSO item, int amount)
     {
         int remaining = amount;

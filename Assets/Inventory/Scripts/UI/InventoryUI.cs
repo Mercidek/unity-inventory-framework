@@ -33,6 +33,8 @@ public class InventoryUI : MonoBehaviour
         {
             foreach (var oldSlot in inventorySlots)
             {
+                oldSlot.OnSlotHovered -= HoverSlot;
+                oldSlot.OnSlotClicked -= UseItemAtSlot;
                 slotPool.Release(oldSlot);
             }
             inventorySlots.Clear();
@@ -48,7 +50,15 @@ public class InventoryUI : MonoBehaviour
             InventorySlotUI newSlot = slotPool.Get();
             newSlot.transform.SetAsLastSibling();
             inventorySlots.Add(newSlot);
-            newSlot.InitSlot(i, this);
+            newSlot.InitSlot(i);
+
+            // Refresh event subscriptions
+            newSlot.OnSlotClicked -= UseItemAtSlot;
+            newSlot.OnSlotHovered -= HoverSlot;
+
+            newSlot.OnSlotClicked += UseItemAtSlot;
+            newSlot.OnSlotHovered += HoverSlot;
+
             UpdateSingleSlot(i);
         }
 
@@ -74,6 +84,18 @@ public class InventoryUI : MonoBehaviour
         {
             currentInventory.OnSlotChanged -= UpdateSingleSlot;
         }
+
+        if(inventorySlots != null && inventorySlots.Count > 0)
+        {
+            foreach(var slot in inventorySlots)
+            {
+                if(slot != null)
+                {
+                    slot.OnSlotClicked -= UseItemAtSlot;
+                    slot.OnSlotHovered -= HoverSlot;
+                }
+            }
+        }
     }
 
     public void UpdateSingleSlot(int slotIndex)
@@ -88,6 +110,15 @@ public class InventoryUI : MonoBehaviour
         if (item != null)
         {
             TooltipManager.Instance.ShowTooltip(item.ItemName, item.ItemDesc);
+        }
+    }
+
+    public void UseItemAtSlot(int slotIndex, int useAmount = 1)
+    {
+        ItemSO item = currentInventory.GetItemAtSlot(slotIndex, out int slotAmount);
+        if (item != null && slotAmount >= useAmount)
+        {
+            currentInventory.RemoveItemAtSlot(slotIndex, useAmount);
         }
     }
 }
