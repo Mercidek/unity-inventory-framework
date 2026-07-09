@@ -21,6 +21,7 @@ public class InventoryHolder : MonoBehaviour
     private void Awake()
     {
         Inventory = new InventoryManager(inventorySize);
+        Inventory.SetOwner(gameObject);
 
         foreach(var startItem in startingItems)
         {

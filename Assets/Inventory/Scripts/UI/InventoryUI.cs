@@ -118,7 +118,10 @@ public class InventoryUI : MonoBehaviour
         ItemSO item = currentInventory.GetItemAtSlot(slotIndex, out int slotAmount);
         if (item != null && slotAmount >= useAmount)
         {
-            currentInventory.RemoveItemAtSlot(slotIndex, useAmount);
+            if (item.CanUseItem(currentInventory.Owner))
+            {
+                currentInventory.RemoveItemAtSlot(slotIndex, useAmount);
+            }
         }
     }
 }

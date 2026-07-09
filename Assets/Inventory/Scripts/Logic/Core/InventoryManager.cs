@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class InventoryManager
 {
+    public GameObject Owner { get; private set; }
+
     private InventorySlot[] slots;
     public int InventorySize => slots.Length;
 
@@ -175,6 +177,11 @@ public class InventoryManager
     {
         amount = slots[slotIndex].currentAmount;
         return slots[slotIndex].item;
+    }
+
+    public void SetOwner(GameObject owner)
+    {
+        Owner = owner;
     }
 }
 
