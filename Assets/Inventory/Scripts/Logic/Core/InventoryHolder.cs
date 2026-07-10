@@ -16,22 +16,29 @@ public class InventoryHolder : MonoBehaviour
     [SerializeField] private int inventorySize = 10;
     [SerializeField] private List<StartingItem> startingItems = new List<StartingItem>();
 
-    public InventoryManager Inventory { get; private set; }
-
-    private void Awake()
+    public InventoryManager Inventory 
     {
-        Inventory = new InventoryManager(inventorySize);
-        Inventory.SetOwner(gameObject);
-
-        foreach(var startItem in startingItems)
+        get
         {
-            if(startItem.item == null) continue;
-            Inventory.AddItem(startItem.item, startItem.amount);
+            if(myInventory == null)
+            {
+                myInventory = new InventoryManager();
+                myInventory.initializeSlots(inventorySize);
+                myInventory.SetOwner(gameObject);
+            }
+            return myInventory;
         }
+        private set => myInventory = value;
     }
 
     private void Start()
     {
+        foreach (var startItem in startingItems)
+        {
+            if (startItem.item == null) continue;
+            Inventory.AddItem(startItem.item, startItem.amount);
+        }
+
         myUIPanel.SetupInventoryUI(Inventory);
     }
 }

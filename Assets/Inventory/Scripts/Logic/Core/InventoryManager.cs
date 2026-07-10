@@ -8,9 +8,18 @@ public class InventoryManager
     private InventorySlot[] slots;
     public int InventorySize => slots.Length;
 
+    ///<summary> Triggers when a slot updates. Passes the modified slot index (int).</summary>
     public event Action<int> OnSlotChanged;
+    ///<summary> Triggers when an item is successfully added to the inventory. Passes the item data (ItemSO) and item amount (int).</summary>
+    public event Action<ItemSO, int> OnItemAdded;
+    ///<summary> Triggers when an item is successfully removed from the inventory. Passes the item data (ItemSO) and item amount (int).</summary>
+    public event Action<ItemSO, int> OnItemRemoved;
 
-    public InventoryManager(int size)
+    public InventoryManager()
+    {
+    }
+
+    public void initializeSlots(int size)
     {
         slots = new InventorySlot[size];
     }
@@ -44,7 +53,12 @@ public class InventoryManager
                         OnSlotChanged?.Invoke(i);
                     }
                 }
-                if (leftoverItemCount == 0) return true;
+
+                if(leftoverItemCount == 0)
+                {
+                    OnItemAdded?.Invoke(newItem, amount);
+                    return true;
+                }
             }
         }
 
@@ -68,7 +82,12 @@ public class InventoryManager
                     leftoverItemCount = 0;
                     OnSlotChanged?.Invoke(i);
                 }
-                if (leftoverItemCount == 0) return true;
+
+                if(leftoverItemCount == 0)
+                {
+                    OnItemAdded?.Invoke(newItem, amount);
+                    return true;
+                }
             }
         }
         return true;
@@ -84,7 +103,7 @@ public class InventoryManager
         for (int i = count-1; i >= 0; i--)
         {
             ref InventorySlot slot = ref slots[i];
-            if(slot.item != null && item.ItemID == slot.item.ItemID)
+            if (slot.item != null && item.ItemID == slot.item.ItemID)
             {
                 if(slot.currentAmount > remainingRemove)
                 {
@@ -100,7 +119,11 @@ public class InventoryManager
                     OnSlotChanged?.Invoke(i);
                 }
 
-                if(remainingRemove == 0) return true;
+                if(remainingRemove == 0)
+                {
+                    OnItemRemoved?.Invoke(item, amount);
+                    return true;
+                }
             }
         }
         return true;
@@ -109,19 +132,18 @@ public class InventoryManager
     public void RemoveItemAtSlot(int slotIndex, int amount)
     {
         ref InventorySlot slot = ref slots[slotIndex];
+        ItemSO itemToRemove = slot.item;
         if (slot.item != null)
         {
-            if (slot.currentAmount >= amount)
+            if (slot.currentAmount > amount)
             {
                 slot.currentAmount -= amount;
-                OnSlotChanged?.Invoke(slotIndex);
             }
-
-            if(slot.currentAmount <= 0)
+            else
             {
+                slot.currentAmount = 0;
                 slot.item = null;
                 TooltipManager.Instance.HideTooltip();
-                OnSlotChanged?.Invoke(slotIndex);
             }
         }
     }
@@ -173,6 +195,16 @@ public class InventoryManager
         }
         return false;
     }
+
+    ///<summary> Updates a specific slot at the given index in the inventory.</summary>
+    public void NotifySlotChange(int slotIndex)
+    {
+        if (slotIndex >= 0 && slotIndex < slots.Length)
+        {
+            OnSlotChanged?.Invoke(slotIndex);
+        }
+    }
+
     public ItemSO GetItemAtSlot(int slotIndex, out int amount)
     {
         amount = slots[slotIndex].currentAmount;

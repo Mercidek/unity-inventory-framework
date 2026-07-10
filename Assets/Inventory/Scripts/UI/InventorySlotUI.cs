@@ -15,7 +15,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void InitSlot(int index)
     {
-        myIndex   = index;
+        myIndex = index;
     }
 
     public void UpdateSlotUI(ItemSO item, int amount)

@@ -113,7 +113,7 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    public void UseItemAtSlot(int slotIndex, int useAmount = 1)
+    public void UseItemAtSlot(int slotIndex, int useAmount)
     {
         ItemSO item = currentInventory.GetItemAtSlot(slotIndex, out int slotAmount);
         if (item != null && slotAmount >= useAmount)
@@ -121,6 +121,7 @@ public class InventoryUI : MonoBehaviour
             if (item.CanUseItem(currentInventory.Owner))
             {
                 currentInventory.RemoveItemAtSlot(slotIndex, useAmount);
+                currentInventory.NotifySlotChange(slotIndex);
             }
         }
     }
