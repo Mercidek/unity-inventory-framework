@@ -22,6 +22,7 @@ public class InventoryUI : MonoBehaviour
             maxSize: 100
         );
     }
+
     public void SetupInventoryUI(InventoryManager inventory)
     {
         if(!gameObject.activeSelf)
@@ -40,7 +41,11 @@ public class InventoryUI : MonoBehaviour
             inventorySlots.Clear();
         }
 
-        if (currentInventory != null) currentInventory.OnSlotChanged -= UpdateSingleSlot;
+        if (currentInventory != null)
+        {
+            currentInventory.OnSlotChanged -= UpdateSingleSlot;
+            currentInventory.OnInventoryRefreshed -= RefreshInventoryUI;
+        }
 
         currentInventory = inventory;
 
@@ -63,6 +68,7 @@ public class InventoryUI : MonoBehaviour
         }
 
         currentInventory.OnSlotChanged += UpdateSingleSlot;
+        currentInventory.OnInventoryRefreshed += RefreshInventoryUI;
     }
 
     public void CloseInventoryUI()
@@ -78,11 +84,20 @@ public class InventoryUI : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    public void RefreshInventoryUI()
+    {
+        if (currentInventory != null)
+        {
+            SetupInventoryUI(currentInventory);
+        }
+    }
+
     private void OnDisable()
     {
         if(currentInventory != null)
         {
             currentInventory.OnSlotChanged -= UpdateSingleSlot;
+            currentInventory.OnInventoryRefreshed -= RefreshInventoryUI;
         }
 
         if(inventorySlots != null && inventorySlots.Count > 0)

@@ -149,6 +149,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f0b9a06de8afb34aa22feb1b05f7774, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryHolder
+  itemDatabase: {fileID: 11400000, guid: c890337efba0f1b4bb3274d6a8c8bde2, type: 2}
+  saveFileName: exampleInventorySave
   myUIPanel: {fileID: 1517875052}
   inventorySize: 10
   startingItems: []

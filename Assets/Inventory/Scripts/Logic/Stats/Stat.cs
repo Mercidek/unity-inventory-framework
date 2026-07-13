@@ -13,7 +13,7 @@ public class Stat
 
     public bool ChangeValue(float value)
     {
-        if(currentValue >= maxValue)
+        if((currentValue >= maxValue && value > 0) || (currentValue <= 0 && value < 0))
         {
             return false;
         }

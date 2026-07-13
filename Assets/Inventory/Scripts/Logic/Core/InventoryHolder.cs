@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class InventoryHolder : MonoBehaviour
 {
+    [SerializeField] private ItemDatabaseSO itemDatabase;
+    [SerializeField] private string saveFileName;
     [SerializeField] private InventoryManager myInventory;
     [SerializeField] private InventoryUI myUIPanel;
 
@@ -22,7 +24,7 @@ public class InventoryHolder : MonoBehaviour
         {
             if(myInventory == null)
             {
-                myInventory = new InventoryManager();
+                myInventory = new InventoryManager(saveFileName);
                 myInventory.initializeSlots(inventorySize);
                 myInventory.SetOwner(gameObject);
             }
@@ -33,10 +35,20 @@ public class InventoryHolder : MonoBehaviour
 
     private void Start()
     {
-        foreach (var startItem in startingItems)
+        // If this inventory has a save file then load it, otherwise load with the starting items
+        if(Inventory.HasSaveFile())
         {
-            if (startItem.item == null) continue;
-            Inventory.AddItem(startItem.item, startItem.amount);
+            Inventory.LoadInventory(itemDatabase);
+        }
+        else
+        {
+            Inventory.EmptyInventory();
+
+            foreach (var startItem in startingItems)
+            {
+                if (startItem.item == null) continue;
+                Inventory.AddItem(startItem.item, startItem.amount);
+            }
         }
 
         myUIPanel.SetupInventoryUI(Inventory);

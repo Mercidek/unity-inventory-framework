@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 
 public class InventoryManager
@@ -8,20 +9,84 @@ public class InventoryManager
     private InventorySlot[] slots;
     public int InventorySize => slots.Length;
 
+    private InventorySaveManager saveManager = new InventorySaveManager();
+
+    private readonly string saveFileID;
+    private const string defaultSaveFileName = "inventorySave";
+    private readonly string savePath;
+
     ///<summary> Triggers when a slot updates. Passes the modified slot index (int).</summary>
     public event Action<int> OnSlotChanged;
     ///<summary> Triggers when an item is successfully added to the inventory. Passes the item data (ItemSO) and item amount (int).</summary>
     public event Action<ItemSO, int> OnItemAdded;
     ///<summary> Triggers when an item is successfully removed from the inventory. Passes the item data (ItemSO) and item amount (int).</summary>
     public event Action<ItemSO, int> OnItemRemoved;
+    ///<summary> Triggers when the inventory fully changes, such as when loading slot data from a saved file.</summary>
+    public event Action OnInventoryRefreshed;
 
-    public InventoryManager()
+    public InventoryManager(string saveFileName)
     {
+        saveFileID = string.IsNullOrEmpty(saveFileName) ? defaultSaveFileName : saveFileName;
+        savePath   = Path.Combine(Application.persistentDataPath, $"{saveFileID}.json");
     }
 
     public void initializeSlots(int size)
     {
         slots = new InventorySlot[size];
+    }
+
+    public void SaveInventory()
+    {
+        saveManager.slotsData.Clear();
+
+        for(int i = 0; i < InventorySize; i++)
+        {
+            ItemSO item = GetItemAtSlot(i, out int amount);
+
+            if(item != null)
+            {
+                saveManager.slotsData.Add(new SlotSaveData(item.ItemID, amount, i));
+            }
+            else
+            {
+                saveManager.slotsData.Add(new SlotSaveData(-1, 0, i));
+            }
+        }
+
+        string jsonData = JsonUtility.ToJson(saveManager);
+        File.WriteAllText(savePath, jsonData);
+    }
+
+    public void LoadInventory(ItemDatabaseSO itemDatabase)
+    {
+        if(!File.Exists(savePath)) return;
+
+        string jsonData = File.ReadAllText(savePath);
+        JsonUtility.FromJsonOverwrite(jsonData, saveManager);
+
+        EmptyInventory();
+
+        foreach(var savedSlot in saveManager.slotsData)
+        {
+            if(savedSlot.slotIndex >= 0 && savedSlot.slotIndex < InventorySize)
+            {
+                if (savedSlot.itemID != -1)
+                {
+                    ItemSO itemData = itemDatabase.GetItemFromDatabase(savedSlot.itemID);
+                    if (itemData != null)
+                    {
+                        slots[savedSlot.slotIndex].item = itemData;
+                        slots[savedSlot.slotIndex].currentAmount = savedSlot.itemAmount;
+                    }
+                }
+            }
+        }
+        OnInventoryRefreshed?.Invoke();
+    }
+
+    public bool HasSaveFile()
+    {
+        return File.Exists(savePath);
     }
 
     // The first loop is for stacking and the second is for adding to an empty slot
@@ -202,6 +267,16 @@ public class InventoryManager
         if (slotIndex >= 0 && slotIndex < slots.Length)
         {
             OnSlotChanged?.Invoke(slotIndex);
+        }
+    }
+
+    ///<summary> Refreshes all slots with null items.</summary>
+    public void EmptyInventory()
+    {
+        for (int i = 0; i < InventorySize; i++)
+        {
+            slots[i].item = null;
+            slots[i].currentAmount = 0;
         }
     }
 
