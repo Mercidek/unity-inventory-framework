@@ -5,8 +5,12 @@ public class InventoryHolder : MonoBehaviour
 {
     [SerializeField] private ItemDatabaseSO itemDatabase;
     [SerializeField] private string saveFileName;
-    [SerializeField] private InventoryManager myInventory;
-    [SerializeField] private InventoryUI myUIPanel;
+    [SerializeField] private GameObject inventoryCanvasPrefab;
+
+    private InventoryManager myInventory;
+    private GameObject myCanvas;
+    private InventoryUI myUIPanel;
+    private bool uiCreated = false;
 
     [System.Serializable]
     public struct StartingItem
@@ -33,6 +37,10 @@ public class InventoryHolder : MonoBehaviour
         private set => myInventory = value;
     }
 
+    private void Awake()
+    {
+        if(myCanvas == null) SpawnInventoryCanvas();
+    }
     private void Start()
     {
         // If this inventory has a save file then load it, otherwise load with the starting items
@@ -51,6 +59,22 @@ public class InventoryHolder : MonoBehaviour
             }
         }
 
-        myUIPanel.SetupInventoryUI(Inventory);
+        if(uiCreated) myUIPanel.SetupInventoryUI(Inventory);
+    }
+
+    private void OnDestroy()
+    {
+        if(myCanvas != null) Destroy(myCanvas);
+    }
+
+    private void SpawnInventoryCanvas()
+    {
+        if(inventoryCanvasPrefab == null) return;
+
+        myCanvas = Instantiate(inventoryCanvasPrefab);
+        myCanvas.name = $"{gameObject.name}{inventoryCanvasPrefab.name}";
+
+        myUIPanel = myCanvas.GetComponentInChildren<InventoryUI>();
+        if(myUIPanel != null ) uiCreated = true;
     }
 }

@@ -59,7 +59,7 @@ public class InventoryManager
 
     public void LoadInventory(ItemDatabaseSO itemDatabase)
     {
-        if(!File.Exists(savePath)) return;
+        if(!File.Exists(savePath) || itemDatabase == null) return;
 
         string jsonData = File.ReadAllText(savePath);
         JsonUtility.FromJsonOverwrite(jsonData, saveManager);
