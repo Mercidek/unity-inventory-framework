@@ -51,10 +51,10 @@ public class InventoryHolder : MonoBehaviour
         else
         {
             Inventory.EmptyInventory();
-
+            
             foreach (var startItem in startingItems)
             {
-                if (startItem.item == null) continue;
+                if(startItem.item == null || startItem.amount <= 0) continue;
                 Inventory.AddItem(startItem.item, startItem.amount);
             }
         }
